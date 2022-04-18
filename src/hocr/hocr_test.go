@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/disintegration/gift"
 	"github.com/schollz/cutter"
 )
 
@@ -89,12 +90,26 @@ func TestHOCR(t *testing.T) {
 				if err != nil {
 					log.Fatal(err)
 				}
+				g := gift.New(
+					gift.Grayscale(),
+					gift.Contrast(10),
+					gift.Threshold(70),
+					gift.ColorFunc(func(r0, g0, b0, a0 float32) (r, g, b, a float32) {
+						if r0 == 0 {
+							return 0, 0, 0, 1
+						} else {
+							return 0, 0, 0, 0
+						}
+					}),
+				)
+				dst := image.NewRGBA(g.Bounds(cImg.Bounds()))
+				g.Draw(dst, cImg)
 				f2, err := os.Create(wordtext + ".png")
 				if err != nil {
 					// Handle error
 				}
 				defer f2.Close()
-				err = png.Encode(f2, cImg)
+				err = png.Encode(f2, dst)
 				if err != nil {
 					// Handle error
 				}
