@@ -36,7 +36,7 @@ func Words(o Options) (err error) {
 		o.Border = 7
 	}
 
-	os.MkdirAll(o.FolderResult, 0644)
+	os.MkdirAll(o.FolderResult, 0755)
 	// open hocr file
 	b, err := ioutil.ReadFile(o.FileHOCR)
 	if err != nil {
@@ -56,6 +56,7 @@ func Words(o Options) (err error) {
 		log.Error(err)
 		return
 	}
+	defer f.Close()
 	img, _, err := image.Decode(f)
 	if err != nil {
 		log.Error(err)
@@ -103,9 +104,7 @@ func Words(o Options) (err error) {
 						continue
 					}
 					wordtext += c.Text
-					fmt.Println(c.Title)
 					coordinates := re.FindAllString(c.Title, -1)
-					fmt.Println(coordinates)
 					if startPos[0] == 0 && startPos[1] == 0 {
 						startPos[0], _ = strconv.Atoi(coordinates[0])
 						startPos[1], _ = strconv.Atoi(coordinates[1])
@@ -119,9 +118,6 @@ func Words(o Options) (err error) {
 					log.Debugf("%s != %s", wordtext, validName)
 					continue
 				}
-				fmt.Println(wordtext)
-				fmt.Println(startPos)
-				fmt.Println(endPos)
 				border := o.Border
 				var cImg image.Image
 				cImg, err = cutter.Crop(img, cutter.Config{
@@ -150,14 +146,14 @@ func Words(o Options) (err error) {
 				f2, err = os.Create(path.Join(o.FolderResult, fmt.Sprintf("%s_%d.png", wordtext, filei)))
 				if err != nil {
 					log.Error(err)
-					return
+					continue
 				}
-				defer f2.Close()
 				err = png.Encode(f2, dst)
 				if err != nil {
 					log.Error(err)
 					return
 				}
+				f2.Close()
 			}
 		}
 	}
