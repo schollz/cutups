@@ -1,0 +1,79 @@
+<html>
+
+<head>
+    <style>
+        .box {
+        margin: auto;
+        width: 500px;
+        padding-top: 1em;
+        /*  border-style: solid;
+*/
+    }
+
+    .container {
+        text-align: center;
+        max-width: 500px;
+    }
+
+    .container>div {
+        display: inline;
+    }
+
+    .container img,
+    .container wired-image {
+        max-width: 100%;
+        vertical-align: middle;
+        margin-bottom: 1em;
+        padding: 0.5em;
+    }
+
+    wired-textarea {
+        margin: 10px 0;
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="box">
+        <textarea placeholder="Enter text 6 rows" rows="6" class="wired-rendered" v-model="text"></textarea>
+        <div class="container">
+            <div v-for="image in images">
+                <img v-bind:src=image onerror='this.style.display = "none"' onload="this.style.display=''" />
+            </div>
+        </div>
+    </div>
+    <script type=" module" src="https://unpkg.com/wired-elements?module"></script>
+    <script src="/static/vue.js"></script>
+    <script>
+    Vue.createApp({
+        data() {
+            return {
+                message: 'Hello Vue!',
+                images: ["/words/newspaper/young_1.png",
+                    "/words/newspaper/at_1.png",
+                    "/words/newspaper/heart_1.png",
+                ],
+                text: "young at heart",
+            }
+        },
+        watch: {
+            text(newText, oldText) {
+                console.log(newText);
+                const words = newText.split(" ");
+                this.images = [];
+                for (var i = 0; i < words.length; i++) {
+                    var word = words[i].trim()
+                    if (word.length == 0) {
+                        continue;
+                    }
+                    this.images.push(`/words/newspaper/${word}_1.png`)
+                }
+            },
+        }
+    }).mount('#app')
+    </script>
+</body>
+
+</html>
